@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chippy Chips</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      color: #222;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 100px 20px;
+      background: linear-gradient(to right, #f5f5f5, #ffffff);
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #666;
+    }
+
+    .btn {
+      margin-top: 30px;
+      padding: 15px 30px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      padding: 60px 40px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      color: #777;
+      font-size: 14px;
+    }
+
+    .buy-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: black;
+      color: white;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Chippy Chips</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#products">Products</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Premium Potato Chips</h1>
+  <p>Simple. Crispy. Perfect.</p>
+  <button class="btn" onclick="scrollToProducts()">Shop Now</button>
+</section>
+
+<section class="products" id="products">
+  <div class="card">
+    <h3>Classic Salted</h3>
+    <p>Perfectly salted, crispy chips.</p>
+    <button class="buy-btn">Buy</button>
+  </div>
+
+  <div class="card">
+    <h3>BBQ Flavor</h3>
+    <p>Sweet and smoky BBQ taste.</p>
+    <button class="buy-btn">Buy</button>
+  </div>
+
+  <div class="card">
+    <h3>Sour Cream & Onion</h3>
+    <p>Rich and tangy flavor.</p>
+    <button class="buy-btn">Buy</button>
+  </div>
+</section>
+
+<footer>
+  © 2026 Chippy Chips. All rights reserved.
+</footer>
+
+<script>
+  function scrollToProducts() {
+    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
