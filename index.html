@@ -1,152 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chippy Chips</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fafafa;
-      color: #222;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    nav a {
-      margin-left: 20px;
-      text-decoration: none;
-      color: #555;
-      font-weight: 500;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 100px 20px;
-      background: linear-gradient(to right, #f5f5f5, #ffffff);
-    }
-
-    .hero h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .hero p {
-      font-size: 18px;
-      color: #666;
-    }
-
-    .btn {
-      margin-top: 30px;
-      padding: 15px 30px;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
-      padding: 60px 40px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      text-align: center;
-    }
-
-    .card h3 {
-      margin-bottom: 10px;
-    }
-
-    .card p {
-      color: #777;
-      font-size: 14px;
-    }
-
-    .buy-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      background: black;
-      color: white;
-      cursor: pointer;
-    }
-
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #888;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chippy Chips</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#FFF8E7;min-height:100vh;}
+input{font-family:'Nunito',sans-serif;}
+button{font-family:'Paytone One',sans-serif;cursor:pointer;}
+input:focus{outline:none;border-color:#E8380D !important;box-shadow:0 0 0 3px rgba(232,56,13,0.12);}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadeIn 0.4s ease both;}
+</style>
 </head>
 <body>
-
-<header>
-  <div class="logo">Chippy Chips</div>
-  <nav>
-    <a href="#">Home</a>
-    <a href="#products">Products</a>
-    <a href="#">Contact</a>
-  </nav>
-</header>
-
-<section class="hero">
-  <h1>Premium Potato Chips</h1>
-  <p>Simple. Crispy. Perfect.</p>
-  <button class="btn" onclick="scrollToProducts()">Shop Now</button>
-</section>
-
-<section class="products" id="products">
-  <div class="card">
-    <h3>Classic Salted</h3>
-    <p>Perfectly salted, crispy chips.</p>
-    <button class="buy-btn">Buy</button>
-  </div>
-
-  <div class="card">
-    <h3>BBQ Flavor</h3>
-    <p>Sweet and smoky BBQ taste.</p>
-    <button class="buy-btn">Buy</button>
-  </div>
-
-  <div class="card">
-    <h3>Sour Cream & Onion</h3>
-    <p>Rich and tangy flavor.</p>
-    <button class="buy-btn">Buy</button>
-  </div>
-</section>
-
-<footer>
-  © 2026 Chippy Chips. All rights reserved.
-</footer>
-
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script>
-  function scrollToProducts() {
-    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-  }
-</script>
+const {useState,useEffect}=React;
+const F="'Paytone One',sans-serif",S="'Nunito',sans-serif";
 
+function luhn(n){
+  const d=n.replace(/\D/g,'');
+  if(d.length<13)return false;
+  let s=0,e=false;
+  for(let i=d.length-1;i>=0;i--){let x=+d[i];if(e&&(x*=2)>9)x-=9;s+=x;e=!e;}
+  return s%10===0;
+}
+function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+function validExp(v){
+  const m=v.match(/^(\d{2})\/(\d{2})$/);
+  if(!m)return false;
+  const mo=+m[1],yr=+('20'+m[2]);
+  if(mo<1||mo>12)return false;
+  const now=new Date();
+  return new Date(yr,mo-1)>=new Date(now.getFullYear(),now.getMonth());
+}
+
+const PRODS=[
+  {id:1,name:'Basic Salt',price:3.99,bg:'#FFD600',fg:'#5C4A00',emo:'🧂',
+   desc:'The OG. Pure sea salt on perfectly crunchy chips. Simple, addictive, iconic.'},
+  {id:2,name:'BBQ',price:4.49,bg:'#FF4500',fg:'#fff',emo:'🔥',
+   desc:'Bold smoky BBQ with caramelized sweetness and a slow-building kick. Pure fire.'},
+  {id:3,name:'Sour Cream & Onion Dip',price:4.79,bg:'#16A34A',fg:'#fff',emo:'🧅',
+   desc:"Creamy, tangy, loaded with roasted onion. The one you can't stop eating."},
+];
+
+function Field({name,placeholder,form,errs,onChange}){
+  return React.createElement('div',{style:{marginBottom:14}},
+    React.createElement('input',{name,value:form[name]||'',onChange,placeholder,
+      style:{width:'100%',padding:'12px 14px',borderRadius:10,
+        border:errs[name]?'2px solid #E8380D':'1.5px solid #D5CFC4',
+        fontSize:15,fontFamily:S,background:'white',display:'block',transition:'border 0.2s'}}),
+    errs[name]&&React.createElement('p',{style:{color:'#E8380D',fontSize:12,marginTop:4,fontFamily:S}},'⚠ '+errs[name])
+  );
+}
+
+function App(){
+  const [page,setPage]=useState('home');
+  const [cart,setCart]=useState([]);
+  const [cartOpen,setCartOpen]=useState(false);
+  const [step,setStep]=useState(1);
+  const [form,setForm]=useState({fn:'',ln:'',email:'',phone:'',addr:'',city:'',st:'',zip:'',cn:'',cnum:'',exp:'',cvv:''});
+  const [errs,setErrs]=useState({});
+  const [busy,setBusy]=useState(false);
+  const [savedOrder,setSavedOrder]=useState(null);
+  const [flashId,setFlashId]=useState(null);
+  const [busyMsg,setBusyMsg]=useState('');
+
+  const count=cart.reduce((s,i)=>s+i.qty,0);
+  const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
+
+  function addToCart(p){
+    setCart(prev=>{
+      const ex=prev.find(x=>x.id===p.id);
+      return ex?prev.map(x=>x.id===p.id?{...x,qty:x.qty+1}:x):[...prev,{...p,qty:1}];
+    });
+    setFlashId(p.id);
+    setTimeout(()=>setFlashId(null),700);
+    setCartOpen(true);
+  }
+  function qty(id,d){setCart(prev=>prev.map(i=>i.id===id?{...i,qty:Math.max(0,i.qty+d)}:i).filter(i=>i.qty>0));}
+
+  function inp(e){
+    let{name:n,value:v}=e.target;
+    if(n==='cnum'){v=v.replace(/\D/g,'').slice(0,16);v=v.replace(/(\d{4})(?=\d)/g,'$1 ');}
+    if(n==='exp'){v=v.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);}
+    if(n==='cvv')v=v.replace(/\D/g,'').slice(0,4);
+    if(n==='zip')v=v.replace(/\D/g,'').slice(0,5);
+    setForm(f=>({...f,[n]:v}));
+    setErrs(er=>({...er,[n]:''}));
+  }
+
+  function validate(s){
+    const e={};
+    if(s===1){
+      if(!form.fn.trim())e.fn='First name required';
+      if(!form.ln.trim())e.ln='Last name required';
+      if(!validEmail(form.email))e.email='Enter a valid email address';
+      if(!form.addr.trim())e.addr='Address required';
+      if(!form.city.trim())e.city='City required';
+      if(!form.st.trim())e.st='State required';
+      if(!/^\d{5}$/.test(form.zip))e.zip='Enter a valid 5-digit ZIP';
+    }
+    if(s===2){
+      if(!form.cn.trim())e.cn='Cardholder name required';
+      if(!luhn(form.cnum.replace(/\s/g,'')))e.cnum='Invalid card number — please double-check';
+      if(!validExp(form.exp))e.exp='Card is expired or date is invalid';
+      if(form.cvv.replace(/\D/g,'').length<3)e.cvv='CVV must be 3–4 digits';
+    }
+    setErrs(e);
+    return !Object.keys(e).length;
+  }
+
+  function next(){if(validate(step))setStep(s=>s+1);}
+
+  function place(){
+    setBusy(true);
+    setBusyMsg('Validating payment...');
+    setTimeout(()=>setBusyMsg('Processing order...'),900);
+    setTimeout(()=>setBusyMsg('Notifying Chippy HQ...'),1600);
+    setTimeout(()=>{
+      const items=cart.map(i=>`  - ${i.qty}x ${i.name} = $${(i.qty*i.price).toFixed(2)}`).join('\n');
+      const sub=encodeURIComponent(`New Chippy Chips Order - ${form.fn} ${form.ln}`);
+      const bod=encodeURIComponent(
+        `============================\n  NEW CHIPPY CHIPS ORDER!\n============================\n\n`+
+        `CUSTOMER:\n  Name: ${form.fn} ${form.ln}\n  Email: ${form.email}\n  Phone: ${form.phone||'N/A'}\n\n`+
+        `SHIPPING ADDRESS:\n  ${form.addr}\n  ${form.city}, ${form.st} ${form.zip}\n\n`+
+        `ORDER ITEMS:\n${items}\n\n`+
+        `  Subtotal:  $${total.toFixed(2)}\n  Shipping:  $2.99\n  TOTAL:     $${(total+2.99).toFixed(2)}\n\n`+
+        `PAYMENT:\n  Card ending in: ${form.cnum.replace(/\s/g,'').slice(-4)}\n  Status: APPROVED\n\n`+
+        `============================`
+      );
+      window.open(`mailto:kincaid.thomasm@gmail.com?subject=${sub}&body=${bod}`,'_blank');
+      setSavedOrder({items:[...cart],total,form:{...form}});
+      setCart([]);
+      setBusy(false);
+      setBusyMsg('');
+      setPage('done');
+    },2400);
+  }
+
+  function goHome(){
+    setPage('home');setStep(1);setSavedOrder(null);
+    setForm({fn:'',ln:'',email:'',phone:'',addr:'',city:'',st:'',zip:'',cn:'',cnum:'',exp:'',cvv:''});
+    setErrs({});
+  }
+
+  // CONFIRMATION
+  if(page==='done') return React.createElement('div',{className:'fadein',style:{fontFamily:S,background:'#FFF8E7',minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'2rem',textAlign:'center'}},
+    React.createElement('div',{style:{fontSize:80,lineHeight:1.2}},'🎉'),
+    React.createElement('h1',{style:{fontFamily:F,fontSize:44,color:'#E8380D',margin:'12px 0 8px',lineHeight:1.1}},'Order Confirmed!'),
+    React.createElement('p',{style:{fontSize:17,color:'#666',maxWidth:420,margin:'0 auto 2rem',lineHeight:1.6}},
+      'Your chips are heading your way! Your email client should open with an order notification to Chippy Chips HQ.'),
+    savedOrder&&React.createElement('div',{style:{background:'white',borderRadius:20,padding:'1.6rem 2rem',maxWidth:380,width:'100%',marginBottom:'1.5rem',textAlign:'left',border:'2px solid #FFE082',boxShadow:'0 4px 20px rgba(0,0,0,0.07)'}},
+      React.createElement('p',{style:{fontFamily:F,fontSize:18,color:'#1A0A00',marginBottom:14}},'Order Summary'),
+      savedOrder.items.map(i=>React.createElement('div',{key:i.id,style:{display:'flex',justifyContent:'space-between',marginBottom:10,fontSize:15,alignItems:'center'}},
+        React.createElement('span',{style:{display:'flex',alignItems:'center',gap:8}},
+          React.createElement('span',{style:{fontSize:20}},i.emo),' '+i.qty+'x '+i.name),
+        React.createElement('span',{style:{fontFamily:F,color:'#E8380D'}},'$'+(i.qty*i.price).toFixed(2))
+      )),
+      React.createElement('div',{style:{borderTop:'2px dashed #EEE',marginTop:12,paddingTop:12,display:'flex',justifyContent:'space-between',fontFamily:F,fontSize:20}},
+        React.createElement('span',null,'Total'),
+        React.createElement('span',{style:{color:'#E8380D'}},'$'+(savedOrder.total+2.99).toFixed(2)))
+    ),
+    savedOrder&&React.createElement('p',{style:{fontSize:13,color:'#AAA',marginBottom:20,fontFamily:S}},
+      '📦 Ships to: '+savedOrder.form.addr+', '+savedOrder.form.city+', '+savedOrder.form.st),
+    React.createElement('button',{onClick:goHome,style:{background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'15px 40px',fontSize:18,fontFamily:F,cursor:'pointer',boxShadow:'0 4px 16px rgba(232,56,13,0.3)'}},
+      'Shop More Chips! 🥔')
+  );
+
+  // CHECKOUT
+  if(page==='checkout') return React.createElement('div',{style:{fontFamily:S,background:'#FFF8E7',minHeight:'100vh'}},
+    React.createElement('div',{style:{background:'#1A0A00',padding:'0 20px',display:'flex',alignItems:'center',height:60,gap:12}},
+      React.createElement('button',{onClick:()=>{setPage('home');setStep(1);},style:{background:'none',border:'none',color:'#FFD600',cursor:'pointer',fontSize:22,padding:0,lineHeight:1}},'←'),
+      React.createElement('span',{style:{fontFamily:F,fontSize:22,color:'#FFD600'}},'CHIPPY'),
+      React.createElement('span',{style:{fontFamily:F,fontSize:22,color:'#FF4500',marginLeft:5}},'CHIPS'),
+      React.createElement('span',{style:{color:'#666',marginLeft:'auto',fontSize:13}},'🔒 Secure Checkout')
+    ),
+    React.createElement('div',{style:{display:'flex',justifyContent:'center',alignItems:'center',padding:'20px 0 4px',gap:6}},
+      ['Shipping','Payment','Review'].map((s,i)=>React.createElement('div',{key:i,style:{display:'flex',alignItems:'center',gap:6}},
+        React.createElement('div',{style:{width:30,height:30,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',
+          background:step>i+1?'#22C55E':step===i+1?'#E8380D':'#DDD',
+          color:step>=i+1?'white':'#AAA',fontSize:13,fontFamily:F,transition:'all 0.3s'}},
+          step>i+1?'✓':String(i+1)),
+        React.createElement('span',{style:{fontSize:13,fontFamily:S,fontWeight:step===i+1?800:400,color:step===i+1?'#E8380D':step>i+1?'#22C55E':'#AAA'}},s),
+        i<2&&React.createElement('span',{style:{color:'#CCC',fontSize:18,margin:'0 2px'}},'›')
+      ))
+    ),
+    React.createElement('div',{style:{maxWidth:540,margin:'0 auto',padding:'1.2rem 1rem 3rem'}},
+      step===1&&React.createElement('div',{className:'fadein',style:{background:'white',borderRadius:20,padding:'1.6rem',border:'1.5px solid #EEE',boxShadow:'0 2px 16px rgba(0,0,0,0.06)'}},
+        React.createElement('h2',{style:{fontFamily:F,fontSize:24,marginBottom:18,color:'#1A0A00'}},'📦 Shipping Info'),
+        React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 12px'}},
+          React.createElement(Field,{name:'fn',placeholder:'First Name',form,errs,onChange:inp}),
+          React.createElement(Field,{name:'ln',placeholder:'Last Name',form,errs,onChange:inp})
+        ),
+        React.createElement(Field,{name:'email',placeholder:'Email Address',form,errs,onChange:inp}),
+        React.createElement(Field,{name:'phone',placeholder:'Phone Number (optional)',form,errs,onChange:inp}),
+        React.createElement(Field,{name:'addr',placeholder:'Street Address',form,errs,onChange:inp}),
+        React.createElement(Field,{name:'city',placeholder:'City',form,errs,onChange:inp}),
+        React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 12px'}},
+          React.createElement(Field,{name:'st',placeholder:'State',form,errs,onChange:inp}),
+          React.createElement(Field,{name:'zip',placeholder:'ZIP Code',form,errs,onChange:inp})
+        ),
+        React.createElement('button',{onClick:next,style:{width:'100%',background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'14px',fontSize:17,fontFamily:F,marginTop:8,boxShadow:'0 4px 16px rgba(232,56,13,0.25)'}},
+          'Continue to Payment →')
+      ),
+      step===2&&React.createElement('div',{className:'fadein',style:{background:'white',borderRadius:20,padding:'1.6rem',border:'1.5px solid #EEE',boxShadow:'0 2px 16px rgba(0,0,0,0.06)'}},
+        React.createElement('h2',{style:{fontFamily:F,fontSize:24,marginBottom:4,color:'#1A0A00'}},'💳 Payment Info'),
+        React.createElement('p',{style:{fontSize:13,color:'#888',marginBottom:18,fontFamily:S}},'🔒 Card number is validated with the Luhn algorithm'),
+        React.createElement(Field,{name:'cn',placeholder:'Cardholder Name',form,errs,onChange:inp}),
+        React.createElement(Field,{name:'cnum',placeholder:'Card Number (16 digits)',form,errs,onChange:inp}),
+        React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 12px'}},
+          React.createElement(Field,{name:'exp',placeholder:'Expiry MM/YY',form,errs,onChange:inp}),
+          React.createElement(Field,{name:'cvv',placeholder:'CVV',form,errs,onChange:inp})
+        ),
+        form.cnum.length>0&&React.createElement('div',{style:{background:'#F0FDF4',border:'1px solid #BBF7D0',borderRadius:10,padding:'9px 14px',fontSize:13,color:'#166534',marginBottom:14,fontFamily:S}},
+          '✓ '+(form.cnum.startsWith('4')?'Visa':form.cnum.startsWith('5')?'Mastercard':form.cnum.startsWith('3')?'American Express':'Card')+' detected'),
+        React.createElement('div',{style:{display:'flex',gap:10}},
+          React.createElement('button',{onClick:()=>setStep(1),style:{padding:'13px 22px',borderRadius:50,border:'2px solid #DDD',background:'transparent',color:'#666',fontSize:15,fontFamily:F,cursor:'pointer'}},
+            '← Back'),
+          React.createElement('button',{onClick:next,style:{flex:1,background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'13px',fontSize:17,fontFamily:F,boxShadow:'0 4px 14px rgba(232,56,13,0.25)'}},
+            'Review Order →')
+        )
+      ),
+      step===3&&React.createElement('div',{className:'fadein'},
+        React.createElement('div',{style:{background:'white',borderRadius:20,padding:'1.6rem',border:'1.5px solid #EEE',marginBottom:14,boxShadow:'0 2px 16px rgba(0,0,0,0.06)'}},
+          React.createElement('h2',{style:{fontFamily:F,fontSize:22,marginBottom:14,color:'#1A0A00'}},'🛒 Order Review'),
+          cart.map(i=>React.createElement('div',{key:i.id,style:{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:'1px solid #F5F5F5'}},
+            React.createElement('div',{style:{width:42,height:42,borderRadius:10,background:i.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}},i.emo),
+            React.createElement('div',{style:{flex:1}},
+              React.createElement('p',{style:{fontWeight:800,fontSize:15,margin:0,fontFamily:S}},i.name),
+              React.createElement('p',{style:{fontSize:13,color:'#999',margin:0}},'Qty: '+i.qty+' × $'+i.price.toFixed(2))
+            ),
+            React.createElement('span',{style:{fontFamily:F,fontSize:16,color:'#E8380D'}},'$'+(i.price*i.qty).toFixed(2))
+          )),
+          React.createElement('div',{style:{paddingTop:12}},
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontSize:14,color:'#888',marginBottom:6}},React.createElement('span',null,'Subtotal'),React.createElement('span',null,'$'+total.toFixed(2))),
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontSize:14,color:'#888',marginBottom:6}},React.createElement('span',null,'Shipping'),React.createElement('span',null,'$2.99')),
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontFamily:F,fontSize:20,borderTop:'2px dashed #EEE',paddingTop:10,marginTop:6}},
+              React.createElement('span',null,'Total'),
+              React.createElement('span',{style:{color:'#E8380D'}},'$'+(total+2.99).toFixed(2)))
+          )
+        ),
+        React.createElement('div',{style:{background:'white',borderRadius:14,padding:'1rem 1.4rem',border:'1.5px solid #EEE',marginBottom:10}},
+          React.createElement('p',{style:{fontFamily:F,fontSize:12,color:'#AAA',margin:'0 0 4px',letterSpacing:1}},'SHIP TO'),
+          React.createElement('p',{style:{fontWeight:700,fontSize:15,margin:0,fontFamily:S}},form.fn+' '+form.ln),
+          React.createElement('p',{style:{fontSize:14,color:'#666',margin:0}},form.addr+', '+form.city+', '+form.st+' '+form.zip),
+          React.createElement('p',{style:{fontSize:14,color:'#888',margin:0}},form.email)
+        ),
+        React.createElement('div',{style:{background:'white',borderRadius:14,padding:'1rem 1.4rem',border:'1.5px solid #EEE',marginBottom:18}},
+          React.createElement('p',{style:{fontFamily:F,fontSize:12,color:'#AAA',margin:'0 0 4px',letterSpacing:1}},'PAYMENT'),
+          React.createElement('p',{style:{fontSize:15,margin:0,fontFamily:S}},
+            '💳 Card ending in '+form.cnum.replace(/\s/g,'').slice(-4)+' — ',
+            React.createElement('span',{style:{color:'#22C55E',fontWeight:700}},'Ready to charge'))
+        ),
+        React.createElement('div',{style:{display:'flex',gap:10,marginBottom:12}},
+          React.createElement('button',{onClick:()=>setStep(2),style:{padding:'13px 22px',borderRadius:50,border:'2px solid #DDD',background:'transparent',color:'#666',fontSize:15,fontFamily:F,cursor:'pointer'}},
+            '← Back'),
+          React.createElement('button',{onClick:place,disabled:busy,
+            style:{flex:1,background:busy?'#FF9980':'#E8380D',color:'white',border:'none',borderRadius:50,padding:'15px',fontSize:17,fontFamily:F,
+              boxShadow:busy?'none':'0 4px 18px rgba(232,56,13,0.3)',display:'flex',alignItems:'center',justifyContent:'center',gap:10}},
+            busy&&React.createElement('span',{style:{display:'inline-block',width:18,height:18,border:'3px solid rgba(255,255,255,0.4)',borderTopColor:'white',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}),
+            busy?busyMsg:'Place Order & Pay →')
+        ),
+        React.createElement('p',{style:{textAlign:'center',fontSize:12,color:'#BBB',fontFamily:S}},'🔒 Secure checkout · 30-day returns · Crunch guaranteed')
+      ),
+      cart.length>0&&React.createElement('div',{style:{background:'#FFF8E7',borderRadius:16,padding:'1rem 1.2rem',marginTop:16,border:'1.5px solid #FFE082'}},
+        React.createElement('p',{style:{fontFamily:F,fontSize:13,color:'#B45309',margin:'0 0 8px'}},'YOUR CART ('+count+' items)'),
+        cart.map(i=>React.createElement('div',{key:i.id,style:{display:'flex',justifyContent:'space-between',fontSize:14,color:'#555',marginBottom:4}},
+          React.createElement('span',null,i.qty+'× '+i.name),
+          React.createElement('span',null,'$'+(i.price*i.qty).toFixed(2))
+        ))
+      )
+    )
+  );
+
+  // HOME PAGE
+  return React.createElement('div',{style:{fontFamily:S,background:'#FFF8E7',minHeight:'100vh'}},
+    React.createElement('nav',{style:{background:'#1A0A00',padding:'0 20px',display:'flex',alignItems:'center',height:64,position:'sticky',top:0,zIndex:100,boxShadow:'0 2px 16px rgba(0,0,0,0.3)'}},
+      React.createElement('span',{style:{fontFamily:F,fontSize:26,color:'#FFD600',letterSpacing:1}},'CHIPPY'),
+      React.createElement('span',{style:{fontFamily:F,fontSize:26,color:'#FF4500',marginLeft:6}},'CHIPS'),
+      React.createElement('div',{style:{marginLeft:'auto',display:'flex',gap:12,alignItems:'center'}},
+        count>0&&React.createElement('button',{onClick:()=>{setPage('checkout');setCartOpen(false);},
+          style:{background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'8px 18px',fontFamily:F,fontSize:14,cursor:'pointer'}},
+          'Checkout ('+count+') →'),
+        React.createElement('button',{onClick:()=>setCartOpen(v=>!v),
+          style:{background:'none',border:'2px solid #FFD600',borderRadius:50,padding:'8px 18px',color:'#FFD600',cursor:'pointer',fontFamily:F,fontSize:14,display:'flex',alignItems:'center',gap:8}},
+          '🛒 Cart',
+          count>0&&React.createElement('span',{style:{background:'#E8380D',color:'white',borderRadius:'50%',width:20,height:20,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700}},String(count))
+        )
+      )
+    ),
+    cartOpen&&React.createElement('div',{onClick:()=>setCartOpen(false),style:{position:'fixed',inset:0,zIndex:150,background:'rgba(0,0,0,0.3)'}}),
+    cartOpen&&React.createElement('div',{style:{position:'fixed',top:64,right:0,width:300,background:'white',boxShadow:'-4px 0 24px rgba(0,0,0,0.15)',zIndex:200,padding:'1.4rem',height:'calc(100% - 64px)',overflowY:'auto'}},
+      React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
+        React.createElement('span',{style:{fontFamily:F,fontSize:18,color:'#1A0A00'}},'Your Cart'),
+        React.createElement('button',{onClick:()=>setCartOpen(false),style:{background:'none',border:'none',cursor:'pointer',fontSize:22,color:'#999',lineHeight:1}},'×')
+      ),
+      cart.length===0?
+        React.createElement('div',{style:{textAlign:'center',padding:'2rem 0',color:'#AAA',fontSize:15,fontFamily:S}},'🛒 Your cart is empty'):
+        React.createElement('div',null,
+          cart.map(i=>React.createElement('div',{key:i.id,style:{display:'flex',alignItems:'center',gap:10,marginBottom:14,padding:'10px',borderRadius:12,border:'1.5px solid #F5F5F5'}},
+            React.createElement('div',{style:{width:40,height:40,borderRadius:10,background:i.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}},i.emo),
+            React.createElement('div',{style:{flex:1}},
+              React.createElement('p',{style:{fontSize:13,fontWeight:800,margin:0,fontFamily:S}},i.name),
+              React.createElement('p',{style:{fontSize:12,color:'#AAA',margin:0}},'$'+i.price.toFixed(2)+' ea')
+            ),
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:6}},
+              React.createElement('button',{onClick:()=>qty(i.id,-1),style:{width:26,height:26,borderRadius:'50%',border:'1.5px solid #DDD',background:'white',cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:S}},'-'),
+              React.createElement('span',{style:{fontSize:14,fontWeight:800,minWidth:18,textAlign:'center',fontFamily:S}},String(i.qty)),
+              React.createElement('button',{onClick:()=>qty(i.id,1),style:{width:26,height:26,borderRadius:'50%',border:'1.5px solid #DDD',background:'white',cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:S}},'+')
+            )
+          )),
+          React.createElement('div',{style:{borderTop:'2px dashed #EEE',paddingTop:12,marginBottom:16}},
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontSize:13,color:'#888',marginBottom:4}},React.createElement('span',null,'Subtotal'),React.createElement('span',null,'$'+total.toFixed(2))),
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontSize:13,color:'#888',marginBottom:10}},React.createElement('span',null,'Shipping'),React.createElement('span',null,'$2.99')),
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',fontFamily:F,fontSize:20,color:'#E8380D'}},
+              React.createElement('span',null,'Total'),React.createElement('span',null,'$'+(total+2.99).toFixed(2)))
+          ),
+          React.createElement('button',{onClick:()=>{setCartOpen(false);setPage('checkout');},
+            style:{width:'100%',background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'13px',fontSize:16,fontFamily:F,cursor:'pointer',boxShadow:'0 4px 14px rgba(232,56,13,0.3)'}},
+            'Checkout →')
+        )
+    ),
+    React.createElement('div',{style:{background:'linear-gradient(135deg,#FFD600 0%,#FF6B00 60%,#FF4500 100%)',padding:'5rem 2rem 4rem',textAlign:'center',position:'relative',overflow:'hidden'}},
+      React.createElement('div',{style:{position:'absolute',top:-40,left:-40,width:200,height:200,borderRadius:'50%',background:'rgba(255,255,255,0.08)'}}),
+      React.createElement('div',{style:{position:'absolute',bottom:-60,right:-30,width:260,height:260,borderRadius:'50%',background:'rgba(0,0,0,0.06)'}}),
+      React.createElement('div',{style:{fontSize:80,lineHeight:1,marginBottom:8,filter:'drop-shadow(2px 4px 8px rgba(0,0,0,0.2))'}},
+        '🥔'),
+      React.createElement('h1',{style:{fontFamily:F,fontSize:'clamp(48px,10vw,88px)',color:'#1A0A00',lineHeight:0.95,textShadow:'3px 3px 0 rgba(255,255,255,0.25)',margin:'0 0 4px'}},
+        'CHIPPY'),
+      React.createElement('h1',{style:{fontFamily:F,fontSize:'clamp(48px,10vw,88px)',color:'white',lineHeight:0.95,textShadow:'3px 3px 0 rgba(0,0,0,0.15)',margin:'0 0 20px'}},
+        'CHIPS'),
+      React.createElement('p',{style:{fontSize:'clamp(16px,3vw,21px)',color:'#3D1F00',fontWeight:900,margin:'0 auto 2rem',maxWidth:460,fontFamily:S}},
+        'Crunch Into Something Amazing ✨'),
+      React.createElement('div',{style:{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}},
+        React.createElement('button',{onClick:()=>document.getElementById('prods').scrollIntoView({behavior:'smooth'}),
+          style:{background:'#1A0A00',color:'#FFD600',border:'none',borderRadius:50,padding:'14px 32px',fontSize:16,fontFamily:F,cursor:'pointer',boxShadow:'0 4px 20px rgba(0,0,0,0.25)'}},
+          'Shop Flavors ↓'),
+        count>0&&React.createElement('button',{onClick:()=>setPage('checkout'),
+          style:{background:'white',color:'#E8380D',border:'none',borderRadius:50,padding:'14px 28px',fontSize:16,fontFamily:F,cursor:'pointer'}},
+          'Checkout ('+count+') →')
+      )
+    ),
+    React.createElement('div',{style:{background:'#1A0A00',padding:'14px 24px',display:'flex',justifyContent:'center',gap:32,flexWrap:'wrap'}},
+      ['🚚 Free shipping over $20','✅ 30-day returns','🥔 Real potato chips','⭐ 5-star crunchy'].map(t=>
+        React.createElement('span',{key:t,style:{color:'#FFD600',fontSize:13,fontFamily:S,fontWeight:600}},t)
+      )
+    ),
+    React.createElement('div',{id:'prods',style:{maxWidth:940,margin:'0 auto',padding:'3rem 1.5rem'}},
+      React.createElement('h2',{style:{fontFamily:F,fontSize:40,textAlign:'center',color:'#1A0A00',marginBottom:8}},'Our Flavors'),
+      React.createElement('p',{style:{textAlign:'center',color:'#888',marginBottom:'2.5rem',fontSize:17}},'Three legendary flavors. One impossible choice.'),
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:24}},
+        PRODS.map(p=>React.createElement('div',{key:p.id,
+          style:{borderRadius:24,overflow:'hidden',boxShadow:'0 6px 30px rgba(0,0,0,0.1)',background:'white',
+            transform:flashId===p.id?'scale(0.96)':'scale(1)',transition:'transform 0.2s, box-shadow 0.2s'}},
+          React.createElement('div',{style:{background:p.bg,padding:'2.5rem 2rem',textAlign:'center',position:'relative',minHeight:180,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}},
+            React.createElement('div',{style:{fontSize:72,filter:'drop-shadow(2px 6px 8px rgba(0,0,0,0.2))'}},p.emo),
+            React.createElement('div',{style:{position:'absolute',top:14,right:14,background:'rgba(0,0,0,0.18)',borderRadius:50,padding:'5px 12px',fontFamily:F,color:p.fg,fontSize:14}},
+              '$'+p.price.toFixed(2))
+          ),
+          React.createElement('div',{style:{padding:'1.4rem 1.6rem'}},
+            React.createElement('h3',{style:{fontFamily:F,fontSize:22,color:'#1A0A00',margin:'0 0 8px'}},p.name),
+            React.createElement('p',{style:{fontSize:14,color:'#777',margin:'0 0 1.2rem',lineHeight:1.65}},p.desc),
+            React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}},
+              React.createElement('span',{style:{fontFamily:F,fontSize:24,color:p.bg==='#FFD600'?'#B45309':'#E8380D'}},'$'+p.price.toFixed(2)),
+              React.createElement('button',{onClick:()=>addToCart(p),
+                style:{background:flashId===p.id?'#22C55E':p.bg==='#FFD600'?'#1A0A00':'#E8380D',
+                  color:p.bg==='#FFD600'&&flashId!==p.id?'#FFD600':'white',
+                  border:'none',borderRadius:50,padding:'11px 22px',fontSize:14,fontFamily:F,cursor:'pointer',
+                  transition:'all 0.2s',boxShadow:'0 3px 12px rgba(0,0,0,0.18)'}},
+                flashId===p.id?'Added! ✓':'Add to Cart')
+            )
+          )
+        ))
+      )
+    ),
+    React.createElement('div',{style:{background:'linear-gradient(135deg,#1A0A00,#3D1A00)',padding:'4rem 2rem',textAlign:'center'}},
+      React.createElement('p',{style:{fontFamily:F,fontSize:'clamp(24px,5vw,36px)',color:'#FFD600',margin:'0 0 10px'}},'Ready to Crunch?'),
+      React.createElement('p',{style:{color:'#AAA',fontSize:15,margin:'0 0 2rem',fontFamily:S}},'Order today · Ships in 2–3 business days · Happiness guaranteed'),
+      count>0?
+        React.createElement('button',{onClick:()=>setPage('checkout'),
+          style:{background:'#E8380D',color:'white',border:'none',borderRadius:50,padding:'16px 40px',fontSize:18,fontFamily:F,cursor:'pointer',boxShadow:'0 6px 24px rgba(232,56,13,0.4)'}},
+          'Checkout ('+count+' items) →')
+        :React.createElement('button',{onClick:()=>document.getElementById('prods').scrollIntoView({behavior:'smooth'}),
+          style:{background:'#FFD600',color:'#1A0A00',border:'none',borderRadius:50,padding:'16px 40px',fontSize:18,fontFamily:F,cursor:'pointer'}},
+          'Pick Your Flavor 🥔')
+    ),
+    React.createElement('div',{style:{background:'#0D0600',padding:'16px 24px',textAlign:'center'}},
+      React.createElement('p',{style:{color:'#555',fontSize:12,fontFamily:S,margin:0}},'© 2026 Chippy Chips · All rights reserved · Made with 🧂 and love')
+    )
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
 </body>
 </html>
